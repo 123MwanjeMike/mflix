@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon -L ./index.js",
-    "start": "node ./index.js",
+    "start": "node index.js",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --passWithNoTests --watch",
     "changestream:update": "node test/lessons/change-updates.js",

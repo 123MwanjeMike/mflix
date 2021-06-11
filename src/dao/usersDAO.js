@@ -170,6 +170,7 @@ export default class UsersDAO {
       // TODO Ticket: User Preferences
       // Use the data in "preferences" to update the user's preferences.
       const updateResponse = await users.updateOne(
+        // This was already solved in previous challenge
         { email: email },
         { $set: { preferences: preferences } },
       )

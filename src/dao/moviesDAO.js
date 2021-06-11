@@ -61,7 +61,9 @@ export default class MoviesDAO {
       // and _id. Do not put a limit in your own implementation, the limit
       // here is only included to avoid sending 46000 documents down the
       // wire.
-      cursor = await movies.find().limit(1)
+      cursor = await movies
+        .find({ countries: { $in: countries } })
+        .project({ title: 1 })
     } catch (e) {
       console.error(`Unable to issue find command, ${e}`)
       return []
@@ -116,7 +118,8 @@ export default class MoviesDAO {
 
     // TODO Ticket: Text and Subfield Search
     // Construct a query that will search for the chosen genre.
-    const query = {}
+
+    const query = { genres: { $in: searchGenre } }
     const project = {}
     const sort = DEFAULT_SORT
 
@@ -194,6 +197,9 @@ export default class MoviesDAO {
     const queryPipeline = [
       matchStage,
       sortStage,
+      skipStage,
+      limitStage,
+      facetStage,
       // TODO Ticket: Faceted Search
       // Add the stages to queryPipeline in the correct order.
     ]
@@ -238,6 +244,7 @@ export default class MoviesDAO {
 
     let { query = {}, project = {}, sort = DEFAULT_SORT } = queryParams
     let cursor
+
     try {
       cursor = await movies
         .find(query)
@@ -259,7 +266,7 @@ export default class MoviesDAO {
 
     // TODO Ticket: Paging
     // Use the cursor to only return the movies that belong on the current page
-    const displayCursor = cursor.limit(moviesPerPage)
+    const displayCursor = cursor.skip(page * moviesPerPage).limit(moviesPerPage)
 
     try {
       const moviesList = await displayCursor.toArray()
@@ -295,10 +302,38 @@ export default class MoviesDAO {
       // Implement the required pipeline.
       const pipeline = [
         {
+          // find the current movie in the "movies" collection
           $match: {
-            _id: ObjectId(id)
-          }
-        }
+            _id: ObjectId(id),
+          },
+        },
+        {
+          // lookup comments from the "comments" collection
+          $lookup: {
+            from: "comments",
+            let: {
+              id: "$_id",
+            },
+            pipeline: [
+              {
+                // only join comments with a match movie_id
+                $match: {
+                  $expr: {
+                    $eq: ["$movie_id", "$$id"],
+                  },
+                },
+              },
+              {
+                // sort by date in descending order
+                $sort: {
+                  date: -1,
+                },
+              },
+            ],
+            // call embedded field comments
+            as: "comments",
+          },
+        },
       ]
       return await movies.aggregate(pipeline).next()
     } catch (e) {

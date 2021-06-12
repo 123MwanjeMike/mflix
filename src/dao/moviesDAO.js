@@ -347,6 +347,10 @@ export default class MoviesDAO {
 
       // TODO Ticket: Error Handling
       // Catch the InvalidId error by string matching, and then handle it.
+      if(e.toString().startsWith(
+          'Error: Argument passed in must be a single String of 12 bytes or a string of 24 hex characters',
+        )
+      ) return null;
       console.error(`Something went wrong in getMovieByID: ${e}`)
       throw e
     }

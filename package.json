@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon -L ./index.js",
     "start": "nodemon -L ./index.js",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --passWithNoTests --watch",

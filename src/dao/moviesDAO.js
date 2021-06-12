@@ -28,7 +28,8 @@ export default class MoviesDAO {
   static async getConfiguration() {
     const roleInfo = await mflix.command({ connectionStatus: 1 })
     const authInfo = roleInfo.authInfo.authenticatedUserRoles[0]
-    const { poolSize, wtimeout } = movies.s.db.serverConfig.s.options
+    const { poolSize, writeConcern } = movies.s.db.serverConfig.s.options
+    const { wtimeout } = writeConcern
     let response = {
       poolSize,
       wtimeout,

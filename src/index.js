@@ -28,7 +28,11 @@ MongoClient.connect(
   // Set the write timeout limit to 2500 milliseconds.
   { 
     poolSize: 50,
-    useNewUrlParser: true 
+    writeConcern: {
+        wtimeout: 2500,
+    },
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   },
 )
   .catch(err => {
